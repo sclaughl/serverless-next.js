@@ -1,11 +1,11 @@
 {
-  "name": "serverless-next.js",
+  "name": "@sclaughl/serverless-next.js",
   "version": "1.9.0",
   "description": "Serverless nextjs powered by Serverless Components",
   "main": "serverless.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danielcondemarin/serverless-nextjs-plugin.git"
+    "url": "git+https://github.com/sclaughl/serverless-nextjs-plugin.git"
   },
   "keywords": [
     "serverless",
