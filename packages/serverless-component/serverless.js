@@ -261,6 +261,11 @@ class NextjsComponent extends Component {
         ? inputs.name
         : inputs.name && inputs.name[lambdaType];
 
+    const getLambdaRuntime = lambdaType =>
+      typeof inputs.runtime === "string"
+        ? inputs.runtime
+        : (inputs.runtime && inputs.runtime[lambdaType]) || "nodejs12.x";
+
     if (hasAPIPages) {
       const apiEdgeLambdaInput = {
         description: inputs.description
@@ -277,7 +282,8 @@ class NextjsComponent extends Component {
           }
         },
         memory: getLambdaMemory("apiLambda"),
-        timeout: getLambdaTimeout("apiLambda")
+        timeout: getLambdaTimeout("apiLambda"),
+        runtime: getLambdaRuntime("apiLambda")
       };
       const apiLambdaName = getLambdaName("apiLambda");
       if (apiLambdaName) apiEdgeLambdaInput.name = apiLambdaName;
@@ -312,6 +318,7 @@ class NextjsComponent extends Component {
       code: join(nextConfigPath, DEFAULT_LAMBDA_CODE_DIR),
       memory: getLambdaMemory("defaultLambda"),
       timeout: getLambdaTimeout("defaultLambda")
+      runtime: getLambdaRuntime("defaultLambda")
     };
 
     if (inputs.hasOwnProperty('role_arn')) {
