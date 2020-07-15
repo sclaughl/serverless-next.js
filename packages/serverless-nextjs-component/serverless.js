@@ -443,37 +443,39 @@ class NextjsComponent extends Component {
       };
     }
 
-    const defaultEdgeLambdaInput = {
-      description: "Default Lambda@Edge for Next CloudFront distribution",
-      handler: "index.handler",
-      code: join(nextConfigPath, DEFAULT_LAMBDA_CODE_DIR),
-      memory: getLambdaMemory("defaultLambda"),
-      timeout: getLambdaTimeout("defaultLambda")
-    };
+    if (false) {
+      const defaultEdgeLambdaInput = {
+        description: "Default Lambda@Edge for Next CloudFront distribution",
+        handler: "index.handler",
+        code: join(nextConfigPath, DEFAULT_LAMBDA_CODE_DIR),
+        memory: getLambdaMemory("defaultLambda"),
+        timeout: getLambdaTimeout("defaultLambda")
+      };
 
-    if (inputs.hasOwnProperty('role_arn')) {
-      this.context.debug("A role_arn has been provided")
-      this.context.debug(inputs.role_arn)
-      defaultEdgeLambdaInput.role_arn = inputs.role_arn
-    }
-    else {
-      defaultEdgeLambdaInput.role = {
-        service: ["lambda.amazonaws.com", "edgelambda.amazonaws.com"],
-        policy: {
-          arn:
-            inputs.policy ||
-            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      if (inputs.hasOwnProperty('role_arn')) {
+        this.context.debug("A role_arn has been provided")
+        this.context.debug(inputs.role_arn)
+        defaultEdgeLambdaInput.role_arn = inputs.role_arn
+      }
+      else {
+        defaultEdgeLambdaInput.role = {
+          service: ["lambda.amazonaws.com", "edgelambda.amazonaws.com"],
+          policy: {
+            arn:
+              inputs.policy ||
+              "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
         }
       }
+      const defaultLambdaName = getLambdaName("defaultLambda");
+      if (defaultLambdaName) defaultEdgeLambdaInput.name = defaultLambdaName;
+
+      const defaultEdgeLambdaOutputs = await defaultEdgeLambda(
+        defaultEdgeLambdaInput
+      );
+
+      const defaultEdgeLambdaPublishOutputs = await defaultEdgeLambda.publishVersion();
     }
-    const defaultLambdaName = getLambdaName("defaultLambda");
-    if (defaultLambdaName) defaultEdgeLambdaInput.name = defaultLambdaName;
-
-    const defaultEdgeLambdaOutputs = await defaultEdgeLambda(
-      defaultEdgeLambdaInput
-    );
-
-    const defaultEdgeLambdaPublishOutputs = await defaultEdgeLambda.publishVersion();
 
     const defaultCloudfrontInputs =
       (inputs.cloudfront && inputs.cloudfront.defaults) || {};
@@ -486,11 +488,11 @@ class NextjsComponent extends Component {
           cookies: "all",
           queryString: true,
           ...defaultCloudfrontInputs.forward
-        },
+        }//,
         // lambda@edge key is last and therefore cannot be overridden
-        "lambda@edge": {
-          "origin-request": `${defaultEdgeLambdaOutputs.arn}:${defaultEdgeLambdaPublishOutputs.version}`
-        }
+        //"lambda@edge": {
+        //  "origin-request": `${defaultEdgeLambdaOutputs.arn}:${defaultEdgeLambdaPublishOutputs.version}`
+        //}
       },
       origins: cloudFrontOrigins
     });
