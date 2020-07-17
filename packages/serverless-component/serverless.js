@@ -284,7 +284,6 @@ class NextjsComponent extends Component {
         },
         memory: getLambdaMemory("apiLambda"),
         timeout: getLambdaTimeout("apiLambda"),
-        runtime: getLambdaRuntime("apiLambda")
       };
       const apiLambdaName = getLambdaName("apiLambda");
       if (apiLambdaName) apiEdgeLambdaInput.name = apiLambdaName;
@@ -317,18 +316,25 @@ class NextjsComponent extends Component {
         "Default Lambda@Edge for Next CloudFront distribution",
       handler: "index.handler",
       code: join(nextConfigPath, DEFAULT_LAMBDA_CODE_DIR),
-      role: {
+      memory: getLambdaMemory("defaultLambda"),
+      timeout: getLambdaTimeout("defaultLambda")
+    };
+
+    if (inputs.hasOwnProperty('role_arn')) {
+      this.context.debug("A role_arn has been provided to component");
+      this.context.debug(inputs.role_arn);
+      defaultEdgeLambdaInput.role_arn = inputs.role_arn;
+    }
+    else {
+      defaultEdgeLambdaInput.role = {
         service: ["lambda.amazonaws.com", "edgelambda.amazonaws.com"],
         policy: {
           arn:
             inputs.policy ||
             "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         }
-      },
-      memory: getLambdaMemory("defaultLambda"),
-      timeout: getLambdaTimeout("defaultLambda"),
-      runtime: getLambdaRuntime("defaultLambda")
-    };
+      };
+    }
     const defaultLambdaName = getLambdaName("defaultLambda");
     if (defaultLambdaName) defaultEdgeLambdaInput.name = defaultLambdaName;
 
